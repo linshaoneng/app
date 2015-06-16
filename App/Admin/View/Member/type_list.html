@@ -27,13 +27,8 @@ var memberTypeModule = {
 	//操作格式化
 	operate: function(val){
 		var btn = [];
-		if(val <= 2){
-			btn.push('编辑');
-			btn.push('删除');
-		}else{
-			btn.push('<a href="javascript:void(0);" onclick="memberTypeModule.edit('+val+')">编辑</a>');
-			btn.push('<a href="javascript:void(0);" onclick="memberTypeModule.delete('+val+')">删除</a>');
-		}
+		btn.push('<a href="javascript:void(0);" onclick="memberTypeModule.edit('+val+')">编辑</a>');
+		btn.push('<a href="javascript:void(0);" onclick="memberTypeModule.delete('+val+')">删除</a>');
 		return btn.join(' | ');
 	},
 	

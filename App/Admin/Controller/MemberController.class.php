@@ -10,16 +10,48 @@ class MemberController extends CommonController {
 	/**
 	 * 会员管理
 	 */
-	public function memberList($page = 1, $rows = 10, $sort = 'memberid', $order = 'asc'){
+	public function memberList($page = 1, $rows = 10, $search = array(), $sort = 'memberid', $order = 'asc'){
 		if(IS_POST){
 			$member_db      = M('member');
 			$member_type_db = M('member_type');
 			$typelist       = $member_type_db->where(array('disabled'=>'0'))->order('listorder asc')->getField('typeid,typename', true);
 
-			$total = $member_db->count();
+			//搜索
+			$where = array();
+			foreach ($search as $k=>$v){
+				if(!$v) continue;
+				switch ($k){
+					case 'username':
+					case 'nick':
+					case 'mobile':
+						$where[] = "`{$k}` like '%{$v}%'";
+						break;
+					case 'begin':
+						if(!preg_match("/^\d{4}(-\d{2}){2}$/", $v)){
+							unset($search[$k]);
+							continue;
+						}
+						if($search['end'] && $search['end'] < $v) $v = $search['end'];
+						$v = strtotime($v);
+						$where[] = "`regtime` >= '{$v}'";
+						break;
+					case 'end':
+						if(!preg_match("/^\d{4}(-\d{2}){2}$/", $v)){
+							unset($search[$k]);
+							continue;
+						}
+						if($search['begin'] && $search['begin'] > $v) $v = $search['begin'];
+						$v = strtotime($v);
+						$where[] = "`regtime` <= '{$v}'";
+						break;
+				}
+			}
+			$where = implode(' and ', $where);
+
+			$total = $member_db->where($where)->count();
 			$order = $sort.' '.$order;
 			$limit = ($page - 1) * $rows . "," . $rows;
-			$list = $total ? $member_db->field('memberid,username,nick,gender,status,lastloginip,lastlogintime,regtime,typeid')->order($order)->limit($limit)->select() : array();
+			$list = $total ? $member_db->field('memberid,username,nick,gender,status,lastloginip,lastlogintime,regtime,typeid')->where($where)->order($order)->limit($limit)->select() : array();
 			foreach($list as &$info){
 				$info['typename']      = isset($typelist[$info['typeid']]) ? $typelist[$info['typeid']] : '-';
 				$info['lastlogintime'] = $info['lastlogintime'] ? date('Y-m-d H:i:s', $info['lastlogintime']) : '-';
@@ -34,20 +66,22 @@ class MemberController extends CommonController {
 				'options'     => array(
 					'title'   => $currentpos,
 					'url'     => U('Member/memberList', array('grid'=>'datagrid')),
-					'toolbar' => 'memberMemberModule.toolbar',
+					'toolbar' => '#member-member-datagrid-toolbar',
 				),
 				'fields' => array(
 					'会员名'      => array('field'=>'username','width'=>15,'sortable'=>true),
 					'昵称'        => array('field'=>'nick','width'=>15,'sortable'=>true),
 					'性别'        => array('field'=>'gender','width'=>5,'sortable'=>true,'formatter'=>'memberMemberModule.gender'),
 					'会员类型'    => array('field'=>'typename','width'=>15,'sortable'=>false),
-					'最后登录IP'  => array('field'=>'lastloginip','width'=>15,'sortable'=>true),
+					'状态'          => array('field'=>'status','width'=>10,'sortable'=>true,'formatter'=>'memberMemberModule.status'),
 					'最后登录时间' => array('field'=>'lastlogintime','width'=>15,'sortable'=>true,'formatter'=>'memberMemberModule.time'),
-					'状态'        => array('field'=>'status','width'=>10,'sortable'=>true,'formatter'=>'memberMemberModule.status'),
-					'注册时间'    => array('field'=>'regtime','width'=>15,'sortable'=>true,'formatter'=>'memberMemberModule.time'),
-					'管理操作'    => array('field'=>'memberid','width'=>30,'formatter'=>'memberMemberModule.operate'),
+					'最后登录IP'   => array('field'=>'lastloginip','width'=>15,'sortable'=>true),
+					'注册时间'      => array('field'=>'regtime','width'=>15,'sortable'=>true,'formatter'=>'memberMemberModule.time'),
+					'管理操作'      => array('field'=>'memberid','width'=>30,'formatter'=>'memberMemberModule.operate'),
 				)
 			);
+			$dict = dict('', 'Member');
+			$this->assign('dict', $dict);
 			$this->assign('datagrid', $datagrid);
 			$this->display('member_list');
 		}
@@ -63,10 +97,11 @@ class MemberController extends CommonController {
 			if($member_db->where(array('username'=>$data['username']))->field('username')->find()){
 				$this->error('会员名称已经存在');
 			}
-			$passwordinfo = password($data['password']);
+			$passwordinfo       = password($data['password']);
 			$data['password'] = $passwordinfo['password'];
 			$data['encrypt']  = $passwordinfo['encrypt'];
 			$data['regtime']  = time();
+			$data['regip']    = get_client_ip(false, true);
 
 			$id = $member_db->add($data);
 			if($id){
@@ -77,6 +112,8 @@ class MemberController extends CommonController {
 		}else{
 			$member_type_db = M('member_type');
 			$typelist = $member_type_db->where(array('disabled'=>'0'))->getField('typeid,typename', true);
+			$dict = dict('', 'Member');
+			$this->assign('dict', $dict);
 			$this->assign('typelist', $typelist);
 			$this->display('member_add');
 		}
@@ -100,6 +137,8 @@ class MemberController extends CommonController {
 			$member_type_db = M('member_type');
 			$info = $member_db->field('password, encrypt', true)->where(array('memberid'=>$id))->find();
 			$typelist = $member_type_db->where(array('disabled'=>'0'))->getField('typeid,typename', true);
+			$dict = dict('', 'Member');
+			$this->assign('dict', $dict);
 			$this->assign('info', $info);
 			$this->assign('typelist', $typelist);
 			$this->display('member_edit');
@@ -154,17 +193,21 @@ class MemberController extends CommonController {
 			$member_db       = M('member');
 			$field = array(
 				'username'      => '用户名',
+				'head'          => '头像',
 				'nick'          => '昵称',
 				'gender'        => '性别',
 				'status'        => '状态',
+				'regip'          => '注册IP',
 				'regtime'       => '注册时间',
 				'lastloginip'   => '上次登录IP',
 				'lastlogintime' => '上次登录时间',
 				'remark'        => '备注',
 				'typeid'        => '会员类型',
 			);
-			$info = $member_db->field('memberid,password,encrypt', true)->where(array('memberid'=>$id))->find();
+			$info = $member_db->field('memberid,password,encrypt,head', true)->where(array('memberid'=>$id))->find();
+			$dict = dict('', 'Member');
 			foreach ($info as $key=>$value){
+
 				switch ($key){
 					case 'typeid':
 						$member_type_db = M('member_type');
@@ -176,18 +219,18 @@ class MemberController extends CommonController {
 					case 'lastlogintime':
 						$value = $value ? date('Y-m-d H:i:s', $value) : '-';
 						break;
-						
+
+					case 'regip':
 					case 'lastloginip':
 						$value = $value ? $value : '-';
 						break;
 						
 					case 'gender':
-						$dict = array(0=>'女', 1=>'男', 2=>'保密');
-						$value = isset($dict[$value]) ? $dict[$value] : '-';
+						$value = isset($dict['gender'][$value]) ? $dict['gender'][$value] : '-';
 						break;
-						
+
 					case 'status':
-						$dict = array(0=>'<font color="red">未验证</font>', 1=>'已验证');
+						$dict = array(0=>'<font color="red">未认证</font>', 1=>'已认证');
 						$value = isset($dict[$value]) ? $dict[$value] : '-';
 						break;
 				}
@@ -302,7 +345,6 @@ class MemberController extends CommonController {
 	 * 编辑分类
 	 */
 	public function typeEdit($id){
-		if($id == '1') $this->error('该分类不能被修改');
 		$member_type_db = M('member_type');
 		if(IS_POST){
 			$data = I('post.info');
@@ -323,7 +365,10 @@ class MemberController extends CommonController {
 	 * 删除分类
 	 */
 	public function typeDelete($id) {
-		if($id == '1') $this->error('该分类不能被删除');
+		$member_db = M('member');
+		$count = $member_db->where(array('typeid'=>$id))->count();
+		if($count) $this->error("该分类下面仍有 <b>{$count}</b> 个用户");
+
 		$member_type_db = M('member_type');
 		$result = $member_type_db->where(array('typeid'=>$id))->delete();
 		if ($result){

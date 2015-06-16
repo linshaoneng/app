@@ -2,20 +2,31 @@
 
 <easyui:datagrid options="datagrid.options" fields="datagrid.fields" />
 
+<div id="member-member-datagrid-toolbar" style="padding:1px;height:auto">
+	<form style="border-bottom:1px solid #ddd;margin-bottom:1px;padding:5px">
+		注册时间: <input name="search[begin]" class="easyui-datebox" style="width:100px">
+		至: <input name="search[end]" class="easyui-datebox" style="width:100px">
+		会员名:
+		<input type="text" name="search[username]" style="width:100px;padding:2px"/>
+		昵称:
+		<input type="text" name="search[nick]" style="width:100px;padding:2px"/>
+
+		<a href="javascript:;" onclick="memberMemberModule.search(this)" class="easyui-linkbutton" iconCls="icons-table-table">搜索</a>
+	</form>
+	<div>
+		<a href="javascript:;" class="easyui-linkbutton" data-options="plain:true,iconCls:'icons-table-table_add'" onclick="memberMemberModule.add()">添加会员</a>
+		<a href="javascript:;" class="easyui-linkbutton" data-options="plain:true,iconCls:'icons-table-table_refresh'" onclick="memberMemberModule.refresh()">刷新</a>
+	</div>
+</div>
+
 <script type="text/javascript">
 var memberMemberModule = {
 	dialog:   '#globel-dialog-div',
 	datagrid: '#member_memberlist_datagrid',
-	
-	//工具栏
-	toolbar: [
-		{ text: '添加会员', iconCls: 'icons-table-table_add', handler: function(){memberMemberModule.add();} },
-		{ text: '刷新', iconCls: 'icons-table-table_refresh', handler: function(){memberMemberModule.refresh();} }
-	],
 
 	//性别格式化
 	gender: function(key){
-		var gender = {0: '女', 1: '男', 2: '保密'};
+		var gender = <{:json_encode($dict['gender'])}>;
 		return gender[key] || '-';
 	},
 	
@@ -43,6 +54,15 @@ var memberMemberModule = {
 	//刷新
 	refresh: function(){
 		$(this.datagrid).datagrid('reload');
+	},
+
+	//搜索
+	search: function(that){
+		var queryParams = $(this.datagrid).datagrid('options').queryParams;
+		$.each($(that).parent('form').serializeArray(), function() {
+			queryParams[this['name']] = this['value'];
+		});
+		$(this.datagrid).datagrid({pageNumber: 1});
 	},
 	
 	//添加

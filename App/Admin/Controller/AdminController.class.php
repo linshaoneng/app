@@ -373,6 +373,11 @@ class AdminController extends CommonController {
 	 */
 	public function roleDelete($id) {
 		if($id == '1') $this->error('该角色不能被删除');
+
+		$admin_db = D('Admin');
+		$count = $admin_db->where(array('roleid'=>$id))->count();
+		if($count) $this->error("该角色下面仍有 <b>{$count}</b> 个用户");
+
 		$admin_role_db = D('AdminRole');
 		$result = $admin_role_db->where(array('roleid'=>$id))->delete();
 		

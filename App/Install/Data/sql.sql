@@ -159,17 +159,20 @@ CREATE TABLE `app_setting` (
 DROP TABLE IF EXISTS `app_member`;
 CREATE TABLE `app_member` (
   `memberid` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `username` varchar(40) DEFAULT NULL comment '使用邮箱作为账号',
-  `nick` varchar(80) DEFAULT NULL comment '昵称',
-  `gender` tinyint(1) DEFAULT '2' comment '性别' comment '0:女,1:男,2:保密',
-  `password` varchar(32) DEFAULT NULL,
-  `encrypt` varchar(6) DEFAULT NULL,
+  `username` varchar(30) NOT NULL COMMENT '帐号',
+  `head` varchar(255) DEFAULT NULL COMMENT '头像',
+  `nick` varchar(50) DEFAULT NULL COMMENT '昵称',
+  `gender` tinyint(1) DEFAULT '0' COMMENT '0:保密,1:男,2:女',
+  `password` varchar(32) NOT NULL,
+  `encrypt` varchar(6) NOT NULL,
   `typeid` smallint(5) DEFAULT '0',
-  `regtime` int(10)  DEFAULT '0' comment '注册时间',
+
+  `status` tinyint(1) DEFAULT '0' COMMENT '0:待认证1:已认证',
+  `remark` text COMMENT '备注',
   `lastloginip` varchar(15) DEFAULT NULL,
   `lastlogintime` int(10) DEFAULT '0',
-  `status` tinyint(1) DEFAULT '0' comment '0:邮箱未认证,1:正常用户',
-  `remark` text default null comment '备注',
+  `regip` varchar(15) NOT NULL,
+  `regtime` int(10) NOT NULL DEFAULT '0' COMMENT '注册时间',
   PRIMARY KEY (`memberid`),
   KEY `username` (`username`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -228,7 +231,7 @@ CREATE TABLE `app_email`(
 
 INSERT INTO `app_admin` (`userid`, `username`, `password`, `roleid`, `encrypt`,`email`) VALUES (1, 'wangdong', '9877eb2a924c51143c66668d7cc11c2e', 1, 'gKkcJn', '531381545@qq.com');
 INSERT INTO `app_admin_role` VALUES (1,'超级管理员','超级管理员',99,0),(2,'普通用户','普通用户',0,0);
-INSERT INTO `app_member_type` VALUES ('1','普通用户','本地用户', '0', '0'),('2', '联合登录', '账号联合登录', '1', '0');
+INSERT INTO `app_member_type` VALUES ('1','普通用户','本地用户', '0', '0');
 INSERT INTO `app_menu` (`id`, `name`, `parentid`, `c`, `a`, `data`, `listorder`, `display`) VALUES
 (1, '我的面板', 0, 'Admin', 'top', '', 1, '1'),
 (2, '系统管理', 0, 'System', 'top', '', 2, '1'),
