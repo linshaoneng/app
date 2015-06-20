@@ -7,7 +7,19 @@
  */
 (function($){
 	$.extend({ app: { method: {}, module: {} } });
-
+	$.fn.extend({
+		requestFullScreen: function() {
+			return this.each(function() {
+				if (fullScreenApi.supportsFullScreen) {
+					if (fullScreenApi.isFullScreen()) {
+						fullScreenApi.cancelFullScreen(this);
+					} else {
+						fullScreenApi.requestFullScreen(this);
+					}
+				}
+			});
+		}
+	})
 	/* 消息提示 */
 	$.extend($.app.method, { tip:
 		function (title, msg, icon, timeout, showType) {
@@ -310,6 +322,12 @@
 			},
 			message: '不能使用HTML标签'
 		},
+		unzh: {
+			validator: function(value){
+				return !/[\u4E00-\u9FA5]/i.test(value);
+			},
+			message: '不能有中文字符'
+		},
 		exts: {
 			validator: function(value){
 				return /^\w+(,\w+)*$/.test(value);
@@ -317,4 +335,71 @@
 			message: '必须为文件后缀名格式，多个可用逗号拼接'
 		}
 	});
+	
+	
+	/**
+     * 全屏API
+     * 来源：http://www.2fz1.com/?p=108
+     */
+    window.fullScreenApi = {
+        supportsFullScreen: false,
+        isFullScreen: function() { return false; },
+        requestFullScreen: function() {},
+        cancelFullScreen: function() {},
+        fullScreenEventName: '',
+        prefix: ''
+    };
+
+    var browserPrefixes = ['webkit', 'moz', 'o', 'ms', 'khtml'];
+    if (typeof document.cancelFullScreen != 'undefined') {
+        fullScreenApi.supportsFullScreen = true;
+    } else {
+        //检测支持全屏的浏览器前缀，该API各浏览器厂商在该方法加了自己的前缀
+        for (var i = 0, il = browserPrefixes.length; i < il; i++ ) {
+            fullScreenApi.prefix = browserPrefixes[i];
+            if (typeof document[fullScreenApi.prefix + 'CancelFullScreen' ] != 'undefined' ) {
+                fullScreenApi.supportsFullScreen = true;
+                break;
+            }
+        }
+    }
+
+    if (fullScreenApi.supportsFullScreen) {
+        fullScreenApi.fullScreenEventName = fullScreenApi.prefix + 'fullscreenchange';
+
+        fullScreenApi.isFullScreen = function() {
+            switch (this.prefix) {
+                case '':
+                    return document.fullScreen;
+                case 'webkit':
+                    return document.webkitIsFullScreen;
+                default:
+                    return document[this.prefix + 'FullScreen'];
+            }
+        };
+        fullScreenApi.requestFullScreen = function(el) {
+            return (this.prefix === '') ? el.requestFullScreen() : el[this.prefix + 'RequestFullScreen']();
+        };
+        fullScreenApi.cancelFullScreen = function(el) {
+            return (this.prefix === '') ? document.cancelFullScreen() : document[this.prefix + 'CancelFullScreen']();
+        };
+    }
+
+    // 按ESC键dialog响应关闭事件
+    $(document).bind('keydown', function(e) {
+        var $dialog = $('.panel.window').find('.panel-body.panel-body-noborder.window-body');
+        var $messager = $('.panel.window.messager-window');
+        if ($messager[0]) {
+            if (27 === e.keyCode) { // ESC
+                $('.messager-button > .l-btn', $messager).eq(-1).trigger('click');
+            }
+        } else if ($dialog[0]) {
+            if (27 === e.keyCode) { // ESC
+                $($dialog).dialog("close");
+            }
+            if (13 === e.keyCode) { // Enter
+                $('.dialog-button > .l-btn:eq(-2)', $dialog).trigger('click');
+            }
+        }
+    });
 })(jQuery);

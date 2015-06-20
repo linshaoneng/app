@@ -77,5 +77,10 @@ return array(
 		'__PUBLIC__'        => SCRIPT_DIR . '/Public',
 		'__STATIC__'        => SCRIPT_DIR . '/Public/static',
 	),
-
+	
+	/* 极验验证key设置 */
+	'GEETESTCODE' => array(
+		'key'     => "e1f29ef5410819906b9d983a165d2d9c",
+		'id'	  => "835ae5af25c5790a91680dd615d93987"
+	),
 );
