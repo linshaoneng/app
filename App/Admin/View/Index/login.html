@@ -68,7 +68,7 @@ function login(){
 		$.messager.progress('close');
 		if(!data.status){
 			$.app.method.tip('提示信息', data.info, 'error');
-			changeCode();
+			<notpresent name="geetest">changeCode();</notpresent>
 		}else{
 			window.location.href = data.url;
 		}

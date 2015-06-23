@@ -18,6 +18,7 @@ return array(
 	'LOGIN_WAIT_TIME'       => 60,         //登录次数达到后需要等待时间才能再次登录，单位：分钟
 	'LOGIN_ONLY_ONE'        => 0,          //开启单点登录
 	'DATAGRID_PAGE_SIZE'    => 20,         //列表默认分页数
+
 	
 	/* 单独配置，会覆盖全局配置 */
 	'FILE_UPLOAD_LINK_CONFIG' => array(
@@ -32,4 +33,10 @@ return array(
 	'FILE_UPLOAD_MEDIA_CONFIG' => array(
 		'exts' => array('avi'),
 	),
+	
+	/* 数据库备份设置 */
+	'DATA_BACKUP_PATH'			=> './Public/Runtime/Data/',    //路径必须以 / 结尾
+	'DATA_BACKUP_PART_SIZE'     => '20971520',  				//该值用于限制压缩后的分卷最大长度。单位：B；建议设置20M
+	'DATA_BACKUP_COMPRESS'     	=> '1',							//压缩备份文件需要PHP环境支持gzopen,gzwrite函数 0:不压缩 1:启用压缩
+	'DATA_BACKUP_COMPRESS_LEVEL'=> '9',							//压缩级别   1:普通   4:一般   9:最高
 );
