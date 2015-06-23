@@ -316,8 +316,8 @@ INSERT INTO `app_menu` (`id`, `name`, `parentid`, `c`, `a`, `data`, `listorder`,
 (68, '上传管理', 38, 'Storage', 'index', '', 0, '1');
 
 (69, '数据管理',  2, 'Database', 'exportlist', '', 0, '1'),
-(70, '模版列表', 63, 'Database', 'exportlist', '', 0, '1'),
-(71, '上传管理', 38, 'Database', 'importlist', '', 0, '1');
+(70, '备份数据库', 63, 'Database', 'exportlist', '', 0, '1'),
+(71, '还原数据库', 38, 'Database', 'importlist', '', 0, '1');
 
 -- (63, '扩展管理', 5, 'Extend', 'left', '', 1, '1'),
 -- (64, '扩展下载', 63, 'Extend', 'download', '', 0, '1'),
