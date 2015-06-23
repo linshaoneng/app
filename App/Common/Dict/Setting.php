@@ -63,6 +63,25 @@ return array(
 		'editor'  => 'numberbox',
 		'default' => C('DATAGRID_PAGE_SIZE'),
 	),
+	'TABLES_TOOLS_POSITION' => array(
+		'name'    => '后台内容工具栏位置',
+		'group'   => '后台设置',
+		'value'   => '0',
+		'editor'  => array(
+			'type'=>'combobox',
+			'options'=>array(
+				"valueField"=>'value',
+				"textField" =>'text',
+				"data"=>array(
+					array('value'=>'top','text'=>'上'),
+					array('value'=>'bottom','text'=>'下'),
+					array('value'=>'left','text'=>'左'),
+					array('value'=>'right','text'=>'右')
+				),
+			)
+		),
+		'default' => 'top',
+	),
 	
 	/* 上传设置  */
 	'FILE_UPLOAD_CONFIG.exts' => array(

@@ -20,6 +20,7 @@
 		<ul class="nav-right">
 			<li>
                 <a href="javascript:;" class="easyui-linkbutton" data-options="plain:true,iconCls:'icons-other-house'" onclick="window.open('<{:U('/index')}>')">访问首页</a>
+                <a href="javascript:;" class="easyui-linkbutton" data-options="plain:true,iconCls:'icons-arrow-arrow_out'" onclick="$(body).requestFullScreen()">全屏</a>
                 <a href="javascript:;" class="easyui-splitbutton" data-options="menu:'#toparea-user-info-box',iconCls:'icons-user-user'"><{$userInfo.rolename}></a>
 				<a href="javascript:;" class="easyui-splitbutton" data-options="menu:'#toparea-help-box',iconCls:'icons-other-help'">帮助</a>
 				
@@ -64,11 +65,19 @@
 
 <!-- 内容 -->
 <div id="mainarea" data-options="region:'center'">
-	<div id="pagetabs" class="easyui-tabs" data-options="tabPosition:'bottom',fit:true,border:false,plain:false">
+	<div id="pagetabs" class="easyui-tabs" data-options="tabPosition:'<{:C("TABLES_TOOLS_POSITION")}>',fit:true,border:false,plain:false">
 		<div title="后台首页" href="<{:U('Index/public_main')}>" data-options="cache:false"></div>
 	</div>
 </div>
-
+<div id="rcmenu" class="easyui-menu" style="">
+    <div id="refreshcur" data-options="iconCls:'icons-arrow-arrow_refresh'">刷新</div>
+    <div id="closecur" data-options="iconCls:'icons-arrow-cross'">关闭</div>
+    <div id="closeother">关闭其他</div>
+    <div id="closeall">关闭全部</div>
+    <div class="menu-sep"></div>
+    <div id="closeright">关闭右侧标签页</div>
+    <div id="closeleft">关闭左侧标签页</div>
+</div>
 <!-- 公共部分 -->
 <div id="globel-dialog-div" class="word-wrap" style="line-height:1.5"></div>
 <div id="globel-dialog2-div" class="word-wrap" style="line-height:1.5"></div> <!-- 特殊情况可能需要弹出第2个弹出层 -->
@@ -83,6 +92,7 @@ window.baseModule = {
 
 		this.sessionLife();
 		this.tip();
+		this.mousemenu();
 	},
 	
 	//登录默认提示
@@ -191,8 +201,70 @@ window.baseModule = {
 		if($('#pagetabs').tabs('exists', title)){
 			$('#pagetabs').tabs('select', title);
 		}else{
-			$('#pagetabs').tabs('add',{title: title, href: url, closable: true, cache: false});
+			$('#pagetabs').tabs('add',{title: title, href: url, closable: true, cache: true});
 		}
+	},
+	//鼠标右键菜单
+	mousemenu:function(){
+		$(".tabs-header").bind('contextmenu',function(e){
+	        e.preventDefault();
+	        $('#rcmenu').menu('show', {
+	            left: e.pageX,
+	            top: e.pageY
+	        });
+	    });
+	    //刷新
+	    $("#refreshcur").bind("click",function(){
+	    	var tab = $('#pagetabs').tabs('getSelected');
+	    	var index = $('#pagetabs').tabs('getTabIndex',tab);
+	    	$('#pagetabs').tabs('getTab',index).panel('refresh');
+	    });
+	    //关闭当前标签页
+	    $("#closecur").bind("click",function(){
+	        var tab = $('#pagetabs').tabs('getSelected');
+	        var index = $('#pagetabs').tabs('getTabIndex',tab);
+	        if(index==0){return false;}
+	        $('#pagetabs').tabs('close',index);
+	    });
+	    //关闭所有标签页
+	    $("#closeall").bind("click",function(){
+	        var tablist = $('#pagetabs').tabs('tabs');
+	        for(var i=tablist.length-1;i>0;i--){
+	            $('#pagetabs').tabs('close',i);
+	        }
+	    });
+	    //关闭非当前标签页（先关闭右侧，再关闭左侧）
+	    $("#closeother").bind("click",function(){
+	        var tablist = $('#pagetabs').tabs('tabs');
+	        var tab = $('#pagetabs').tabs('getSelected');
+	        var index = $('#pagetabs').tabs('getTabIndex',tab);
+	        for(var i=tablist.length-1;i>index;i--){
+	            $('#pagetabs').tabs('close',i);
+	        }
+	        var num = index-1;
+	        for(var i=num;i>0;i--){
+	            $('#pagetabs').tabs('close',1);
+	        }
+	         $('#pagetabs').tabs('select',1);
+	    });
+	    //关闭当前标签页右侧标签页
+	    $("#closeright").bind("click",function(){
+	        var tablist = $('#pagetabs').tabs('tabs');
+	        var tab = $('#pagetabs').tabs('getSelected');
+	        var index = $('#pagetabs').tabs('getTabIndex',tab);
+	        for(var i=tablist.length-1;i>index;i--){
+	            $('#pagetabs').tabs('close',i);
+	        }
+	    });
+	    //关闭当前标签页左侧标签页
+	    $("#closeleft").bind("click",function(){
+	        var tab = $('#pagetabs').tabs('getSelected');
+	        var index = $('#pagetabs').tabs('getTabIndex',tab);
+	        var num = index-1;
+	        for(var i=0;i<num;i++){
+	            $('#pagetabs').tabs('close',1);
+	        }
+	    });
 	},
 	
 	//更新缓存
