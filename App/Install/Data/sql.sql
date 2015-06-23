@@ -313,7 +313,7 @@ INSERT INTO `app_menu` (`id`, `name`, `parentid`, `c`, `a`, `data`, `listorder`,
 
 (66, '模版删除', 63, 'System', 'emailDelete', '', 0, '1'),
 (67, '模版列表', 63, 'System', 'emailList', '', 0, '1'),
-(68, '上传管理', 38, 'Storage', 'index', '', 0, '1');
+(68, '上传管理', 38, 'Storage', 'index', '', 0, '1'),
 
 (69, '数据管理',  2, 'Database', 'exportlist', '', 0, '1'),
 (70, '备份数据库', 69, 'Database', 'exportlist', '', 0, '1'),
