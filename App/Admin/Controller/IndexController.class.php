@@ -27,8 +27,7 @@ class IndexController extends CommonController {
 	 * 用户登录
 	 */
 	public function login(){
-		vendor("Geetest.Geetest");
-		$geetest = new \Geetest();
+		$geetest = new \Admin\Plugin\GeetestPlugin();
 		if($geetest->check_geetestStatus()){
 			$geetest->set_privatekey(C("GEETESTCODE.key"));
 			$geetest->set_captchaid(C("GEETESTCODE.id"));
