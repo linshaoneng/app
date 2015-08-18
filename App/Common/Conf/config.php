@@ -67,7 +67,7 @@ return array(
 	'EMAIL_USER'       => '',
 	'EMAIL_PWD'        => '',
 
-	'REPORT_EMAIL'     => '531381545@qq.com',  //报警接收邮箱
+	'REPORT_EMAIL'     => '',  //报警接收邮箱
 
 	'API_SIGN'         => '04B29480233F4DEF5C875875B6BDC3B1', //接口签名
 
