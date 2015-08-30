@@ -15,3 +15,6 @@ http://wangdong.sinaapp.com
 | -------- |-----------------------------------|
 | ThinkPHP | http://doc.thinkphp.cn/           |
 | EasyUI   | http://jeasyui.com/documentation/ |
+
+# 特别说明（2015-08-30）
+此版本将停止更新，尽请期待2.0版本到来
